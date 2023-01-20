@@ -3,7 +3,7 @@
 const mongoose = require("mongoose");
 
 const SauceSchema = mongoose.Schema({
-  userId: { type: String, required: true },
+  userId: { type: String, required: true }, // owner, right? ASK
   name: { type: String, required: true },
   manufacturer: { type: String, required: true },
   description: { type: String, required: true },

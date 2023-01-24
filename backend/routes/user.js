@@ -1,5 +1,3 @@
-// CHECK same as backup
-
 const express = require("express");
 const router = express.Router();
 

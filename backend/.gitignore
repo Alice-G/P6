@@ -1,1 +1,14 @@
 /node_modules
+/images 
+# dotenv environment variables file
+.env
+# ??
+
+# // apparently it's very important to add the dotenv file to the gitignore but also "Files with a dot (.) preceding their name are hidden by default." SOOOOOO?????? ASK
+
+# .env.test3
+
+# // OR
+
+# config/.env
+

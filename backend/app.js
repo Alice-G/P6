@@ -2,23 +2,29 @@
 
 // packages
 const express = require("express");
-const router = express.Router(); // TEST do I need this here?
+const app = express();
+
+require("dotenv").config();
+console.log(process.env.S3_BUCKET);
+console.log(process.env.DB_URL);
+
 const mongoose = require("mongoose");
-const Sauce = require("./models/sauce"); // TEST don't need that?
+
+// const router = express.Router(); // TEST do I need this here?
+// const Sauce = require("./models/sauce"); // TEST don't need that?
 
 const path = require("path");
 
 const saucesRoutes = require("./routes/sauce");
 const userRoutes = require("./routes/user");
 
-const app = express();
-
 app.use(express.json());
 
 // DB connection
 mongoose
   .connect(
-    "mongodb+srv://TestUser616:TestUserGenesis@courseworkn01.kykuvcy.mongodb.net/?retryWrites=true&w=majority"
+    process.env.DB_URL // TODO
+    // "mongodb+srv://TestUser616:TestUserGenesis@courseworkn01.kykuvcy.mongodb.net/?retryWrites=true&w=majority"
   )
   .then(() => {
     console.log("Successfully connected to MongoDB Atlas!");

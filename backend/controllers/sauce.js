@@ -1,10 +1,6 @@
-// ASK 106
-// VALIDATOR 'fs' is not defined.
-// CHECK modified something. Still broken
-
 const Sauce = require("../models/sauce");
 
-const fs = require("fs"); // CHECK this was missing from backup
+const fs = require("fs");
 const { log } = require("console");
 const { LOADIPHLPAPI } = require("dns");
 
@@ -12,6 +8,7 @@ exports.createSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce);
   delete sauceObject._id; // HINT
   delete sauceObject._userId; // HINT
+  console.log(sauceObject); // DEL TEST
   const sauce = new Sauce({
     ...sauceObject, // HINT
     userId: req.auth.userId,
@@ -21,7 +18,9 @@ exports.createSauce = (req, res, next) => {
   });
   sauce
     .save()
-    .then(() => res.status(201).json({ message: "sauce enregistré !" }))
+    .then(() =>
+      res.status(201).json({ message: "You have created a new sauce !" })
+    )
     .catch((error) => res.status(400).json({ error }));
 };
 
@@ -39,28 +38,40 @@ exports.getOneSauce = (req, res, next) => {
     });
 };
 
-// ASK not sure what if else is comparing here, and whether it needs the details of userLiked?
+// ASK can we CHECK here
 exports.modifySauce = (req, res, next) => {
   let sauce = new Sauce({ _id: req.params._id });
   if (req.file) {
     const url = req.protocol + "://" + req.get("host");
     req.body.sauce = JSON.parse(req.body.sauce);
     sauce = {
-      _id: req.params.id, // ASK what is the diff between _id and userId here
-      title: req.body.sauce.title,
+      _id: req.params.id, // which sauce it is
+      userId: req.body.sauce.userId, // who made it/owns it
+      name: req.body.sauce.name,
+      manufacturer: req.body.sauce.manufacturer,
       description: req.body.sauce.description,
+      mainPepper: req.body.sauce.mainPepper, // LEG
       imageUrl: url + "/images/" + req.file.filename,
-      price: req.body.sauce.price,
-      userId: req.body.sauce.userId,
+      heat: req.body.sauce.heat, // LEG
+      likes: req.body.sauce.likes,
+      dislikes: req.body.sauce.dislikes,
+      usersLiked: req.body.sauce.usersLiked,
+      usersDisliked: req.body.sauce.usersDisliked,
     };
   } else {
     sauce = {
       _id: req.params.id,
-      title: req.body.title,
-      description: req.body.description,
-      imageUrl: req.body.imageUrl,
-      price: req.body.price,
       userId: req.body.userId,
+      name: req.body.name,
+      manufacturer: req.body.manufacturer,
+      description: req.body.description,
+      mainPepper: req.body.mainPepper,
+      imageUrl: req.body.imageUrl,
+      heat: req.body.heat,
+      likes: req.body.likes,
+      dislikes: req.body.dislikes,
+      usersLiked: req.body.usersLiked,
+      usersDisliked: req.body.usersDisliked,
     };
   }
   Sauce.updateOne({ _id: req.params.id }, sauce)
@@ -78,17 +89,6 @@ exports.modifySauce = (req, res, next) => {
 
 exports.deleteSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id }).then((sauce) => {
-    // ASK why did we delete that? Do I put it back?
-    // if (!sauce) {
-    //   return res.status(404).json({
-    //     error: new Error("Sauce non trouvé !"),
-    //   });
-    // }
-    // if (sauce.userId !== req.auth.userId) {
-    //   return res.status(401).json({
-    //     error: new Error("Requête non autorisée !"),
-    //   });
-    // }
     const filename = sauce.imageUrl.split("/images/")[1];
     fs.unlink("images/" + filename, () => {
       Sauce.deleteOne({ _id: req.params.id })
@@ -118,98 +118,46 @@ exports.getAllSauces = (req, res, next) => {
     });
 };
 
-// BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK
-// BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK
-// BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK
-// BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK
-// BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK BLOCK
-// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-
-exports.likeSauce = (req, res, next) => {
-  // what sauce is liked
-  let sauce = new Sauce({ _id: req.params._id });
-
-  // who is liking
-  let userWantsToLike = {
-    userId: { _id: req.params._id },
-  };
-  let userWantsToLikeId = userWantsToLike.userId;
-  // console.log(userWantsToLikeId); // table
-
-  // who has liked already
-  let userHasLiked = sauce.likes;
-  console.log(userHasLiked);
-
-  // who has disliked already
-  let userHasDisliked = sauce.dislikes;
-  console.log(userHasDisliked);
-
-  // TODO add who has disliked
-
-  const foundInLikes = userHasLiked.includes(userWantsToLikeId);
-  const foundInDislikes = userHasDisliked.includes(userWantsToLikeId);
-
-  if (req.file) {
-    const url = req.protocol + "://" + req.get("host");
-    req.body.sauce = JSON.parse(req.body.sauce);
-    sauce = {
-      _id: req.params.id,
-      userId: req.body.sauce.userId, //
-      usersLiked: req.body.usersDisliked,
-      usersDisliked: req.body.usersDisliked,
-    };
-  } else {
-    // ASK I don't get what this does
-    // ASK does that section has to have all the lines of the object or can it update just bits
-    sauce = {
-      _id: req.params.id,
-      title: req.body.title,
-      description: req.body.description,
-      imageUrl: req.body.imageUrl,
-      price: req.body.price,
-      userId: req.body.userId,
-    };
-
-    if (foundInLikes) {
-      // user has already liked.
-      alert("On ne peux pas Liker deux fois."); // ????
-      console.log("Already liked.");
-    } else {
-      // user has not liked
-      if (foundInDislikes) {
-        // user has not liked, has disliked
-        console.log("remove dislike");
+exports.likeSauceOrNot = (req, res, next) => {
+  let like = req.body.like;
+  let userId = req.body.userId;
+  const sauceId = req.params.id;
+  Sauce.findOne({ _id: sauceId })
+    .then((sauce) => {
+      // import current status, to edit
+      const newValues = {
+        usersLiked: sauce.usersLiked,
+        usersDisliked: sauce.usersDisliked,
+        likes: 0,
+        dislikes: 0,
+      };
+      // Run through options
+      switch (like) {
+        case 1: // User liked the sauce
+          newValues.usersLiked.push(userId);
+          break;
+        case -1: // User disliked the sauce
+          newValues.usersDisliked.push(userId);
+          break;
+        case 0: // User removed like or dislike
+          if (newValues.usersLiked.includes(userId)) {
+            // removing userId from table of users that liked
+            const index = newValues.usersLiked.indexOf(userId);
+            newValues.usersLiked.splice(index, 1);
+          } else {
+            // removing userId from table of users that disliked
+            const index = newValues.usersDisliked.indexOf(userId);
+            newValues.usersDisliked.splice(index, 1);
+          }
+          break;
       }
-      // add to list of IDs that like
-      userHasLiked.push(userWantsToLikeId);
-      console.log("added to likes");
-      console.log(userHasLiked);
-      // update the sauce in DB
-      // use sauce
-
-      // HINT
-      // this is how to update an object:
-      // var favChar = {
-      //   name: 'Michael Scott',
-      //   company: 'Dunder Mufflin',
-      //   designation: 'Regional Manager',
-      //   show: 'The Office'
-      // }
-      //update:
-      // favChar.designation = 'Hero of Threat Level Midnight'
-      // HINT
-    }
-  }
-
-  Sauce.updateOne({ _id: req.params.id }, sauce)
-    .then(() => {
-      res.status(201).json({
-        message: "Sauce liked successfully!",
-      });
+      // Add up new number of likes and dislikes
+      newValues.likes = newValues.usersLiked.length;
+      newValues.dislikes = newValues.usersDisliked.length;
+      // update sauce with new values
+      Sauce.updateOne({ _id: sauceId }, newValues).then(() =>
+        res.status(200).json({ message: "Sauce évaluée !" })
+      );
     })
-    .catch((error) => {
-      res.status(400).json({
-        error: error,
-      });
-    });
+    .catch((error) => res.status(500).json({ error }));
 };

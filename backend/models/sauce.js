@@ -1,9 +1,7 @@
-// CHECK same as backup
-
 const mongoose = require("mongoose");
 
 const SauceSchema = mongoose.Schema({
-  userId: { type: String, required: true }, // owner, right? ASK
+  userId: { type: String, required: true },
   name: { type: String, required: true },
   manufacturer: { type: String, required: true },
   description: { type: String, required: true },
@@ -12,8 +10,8 @@ const SauceSchema = mongoose.Schema({
   heat: { type: Number, required: true },
   likes: { type: Number, required: true, default: 0 }, // make default/start 0
   dislikes: { type: Number, required: true, default: 0 }, // make default/start 0
-  usersLiked: { type: [String], required: true, default: 0 },
-  usersDisliked: { type: [String], required: true, default: 0 },
+  usersLiked: { type: [String], required: true, default: [] },
+  usersDisliked: { type: [String], required: true, default: [] },
 });
 
 module.exports = mongoose.model("Sauce", SauceSchema);

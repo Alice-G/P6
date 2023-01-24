@@ -1,5 +1,3 @@
-// CHECK same as backup
-
 const mongoose = require("mongoose");
 const uniqueValidator = require("mongoose-unique-validator");
 

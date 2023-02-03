@@ -1,12 +1,9 @@
-// ASK 42
-
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 
 exports.signup = (req, res, next) => {
   bcrypt.hash(req.body.password, 10).then((hash) => {
-    // TODO pass number in .env
     const user = new User({
       email: req.body.email,
       password: hash,
@@ -42,7 +39,7 @@ exports.login = (req, res, next) => {
               error: new Error("Incorrect password!"),
             });
           }
-          const token = jwt.sign({ userId: user._id }, "RANDOM_TOKEN_SECRET", {
+          const token = jwt.sign({ userId: user._id }, process.env.JWT_TOKEN, {
             expiresIn: "24h",
           });
           res.status(200).json({

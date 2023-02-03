@@ -1,5 +1,3 @@
-// CHECK same as backup
-
 const multer = require("multer");
 
 const MIME_TYPES = {
